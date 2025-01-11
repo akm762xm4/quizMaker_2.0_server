@@ -5,7 +5,7 @@ import createHttpError from 'http-errors';
 
 export const getAvailableQuizzes = async (req: Request, res: Response,next:NextFunction) => {
   try {
-    const studentClass = req.user.class; // Assuming `class` is part of the `req.user` payload.
+    const studentClass = req.user?.class; // Assuming `class` is part of the `req.user` payload.
 
     const quizzes = await Quiz.find({
       class: studentClass,
@@ -37,7 +37,7 @@ export const attemptQuiz = async (req: Request, res: Response,next:NextFunction)
 
     // Calculate the score
     let score = 0;
-    quiz.questions.forEach((question, index) => {
+    quiz.questions.forEach((question:any, index) => {
       if (question.correctOption === answers[index]) {
         score++;
       }
@@ -45,7 +45,7 @@ export const attemptQuiz = async (req: Request, res: Response,next:NextFunction)
 
     // Save the result
     const result = new Result({
-      studentId: req.user.id,
+      studentId: req.user?.id,
       quizId,
       score,
       totalQuestions: quiz.questions.length,
@@ -61,7 +61,7 @@ export const attemptQuiz = async (req: Request, res: Response,next:NextFunction)
 
 export const getResults = async (req: Request, res: Response,next:NextFunction) => {
   try {
-    const results = await Result.find({ studentId: req.user.id }).populate('quizId', 'title subject class');
+    const results = await Result.find({ studentId: req.user?.id }).populate('quizId', 'title subject class');
 
     res.status(200).json({ message: 'Results fetched successfully', results });
   } catch (error) {
