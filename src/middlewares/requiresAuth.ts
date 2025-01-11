@@ -23,7 +23,16 @@ export const requiresAuth = async (
     }
 
     const user = await User.findById(decoded.id);
-    req.user = user;
+    if (!user) {
+      throw createHttpError(404, "User not found!");
+    }else{
+      req.user = user as {
+        _id: string;
+        id: string;
+        class?: string;
+        role?: string;
+      };
+    }
     //req.user = await User.findById(decoded.id).exec()
 
     next();
