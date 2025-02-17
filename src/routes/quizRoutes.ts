@@ -1,27 +1,30 @@
-import express from 'express';
+import express from "express";
 import {
   getAllQuizzes,
   getQuizById,
   createQuiz,
   updateQuiz,
   deleteQuiz,
-} from '../controllers/quizControllers';
+  getAllQuizzesAdm,
+} from "../controllers/quizControllers";
 
 const router = express.Router();
 
+router.get("/all", getAllQuizzesAdm);
+
 // Get all quizzes
-router.get('/', getAllQuizzes);
+router.get("/", getAllQuizzes);
 
 // Get a quiz by ID
-router.get('/:id', getQuizById);
+router.get("/:id", getQuizById);
 
 // Create a new quiz
-router.post('/', createQuiz);
+router.post("/", createQuiz);
 
 // Update a quiz
-router.put('/:id', updateQuiz);
+router.put("/:id", updateQuiz);
 
 // Delete a quiz
-router.delete('/:id', deleteQuiz);
+router.delete("/:id", deleteQuiz);
 
 export default router;

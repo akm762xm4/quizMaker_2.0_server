@@ -7,29 +7,35 @@ export const createQuiz = async (
   res: Response,
   next: NextFunction
 ) => {
-  const {
-    title,
-    questions,
-    maxTime,
-    enabled,
-    subject,
-    class: quizClass,
-  } = req.body;
+  const { title, maxTime } = req.body;
 
   try {
     const quiz = new Quiz({
       title,
-      questions,
       maxTime,
-      enabled,
-      subject,
-      class: quizClass,
+      enabled: false,
       createdBy: req.user?._id, // Assuming `req.user.id` stores faculty ID
     });
 
     await quiz.save();
 
     res.status(201).json({ message: "Quiz created successfully", quiz });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllQuizzesAdm = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req?.user) {
+      throw createHttpError(404, "Quizzes not found");
+    }
+    const quizzes = await Quiz.find();
+    res.status(200).json(quizzes);
   } catch (error) {
     next(error);
   }
