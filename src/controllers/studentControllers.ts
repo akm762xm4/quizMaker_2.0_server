@@ -11,9 +11,7 @@ export const getAvailableQuizzes = async (
   try {
     const quizzes = await Quiz.find({ enabled: true });
 
-    res
-      .status(200)
-      .json({ message: "Available quizzes fetched successfully", quizzes });
+    res.status(200).json(quizzes);
   } catch (error) {
     next(error);
   }
@@ -28,7 +26,9 @@ export const attemptQuiz = async (
 
   try {
     // Fetch the quiz
-    const quiz = await Quiz.findById(quizId);
+    const quiz = await Quiz.findById(quizId)
+      .populate("createdBy", "username")
+      .exec();
 
     if (!quiz) {
       throw createHttpError(404, "Quiz not found");
@@ -56,7 +56,7 @@ export const attemptQuiz = async (
 
     await result.save();
 
-    res.status(201).json({ message: "Quiz attempted successfully", result });
+    res.status(201).json({ message: "Quiz attempted successfully" });
   } catch (error) {
     next(error);
   }
@@ -73,7 +73,7 @@ export const getResults = async (
       "title"
     );
 
-    res.status(200).json({ message: "Results fetched successfully", results });
+    res.status(200).json(results);
   } catch (error) {
     next(error);
   }

@@ -2,8 +2,8 @@ import express, { NextFunction, Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import quizRoutes from "./routes/quizRoutes";
+import questionBankRoutes from "./routes/questionBankRoutes";
 import studentRoutes from "./routes/studentRoutes";
-import questionRoutes from "./routes/questionRoutes";
 import { requiresAuth } from "./middlewares/requiresAuth";
 import morgan from "morgan";
 import cors from "cors";
@@ -23,7 +23,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/question", requiresAuth, questionRoutes);
+app.use("/api/qbank", requiresAuth, questionBankRoutes);
 app.use("/api/quiz", requiresAuth, quizRoutes);
 app.use("/api/users", requiresAuth, userRoutes);
 app.use("/api/student", requiresAuth, studentRoutes);

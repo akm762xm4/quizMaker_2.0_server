@@ -69,7 +69,7 @@ export const updateUser = async (
     if (!user) {
       throw createHttpError(404, "User not found");
     }
-    res.status(200).json({ message: "User updated successfully", user });
+    res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
     next(error);
   }
