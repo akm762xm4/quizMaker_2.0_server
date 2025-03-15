@@ -3,6 +3,22 @@ import Quiz from "../models/Quiz";
 import Result from "../models/Result";
 import createHttpError from "http-errors";
 
+export const getAllResults = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const results = await Result.find()
+      .populate("quizId", "title")
+      .populate("studentId", "username");
+
+    res.status(200).json(results);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getAvailableQuizzes = async (
   req: Request,
   res: Response,
@@ -68,10 +84,9 @@ export const getResults = async (
   next: NextFunction
 ) => {
   try {
-    const results = await Result.find({ studentId: req.user?.id }).populate(
-      "quizId",
-      "title"
-    );
+    const results = await Result.find({ studentId: req.user?.id })
+      .populate("quizId", "title")
+      .populate("studentId", "username");
 
     res.status(200).json(results);
   } catch (error) {

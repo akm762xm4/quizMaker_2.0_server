@@ -45,6 +45,26 @@ export const getAllQuestionBanks = async (
   }
 };
 
+export const getQuestionBankById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const role = req.user?.role;
+    const { id } = req.params;
+    if (role === "student") {
+      throw createHttpError(403, "User have no rights !");
+    }
+    const questionBank = await QuestionBank.findById(id)
+      .populate("createdBy", "username") // Fetch only the username of the creator
+      .exec(); // Fetch all question banks
+    res.status(200).json(questionBank);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Edit Question Bank title
 export const renameQuestionBank = async (
   req: Request,
@@ -125,11 +145,11 @@ export const addQuestion = async (
 ) => {
   try {
     const { id } = req.params;
-    const { text, options, correctAnswer, category } = req.body;
+    const { text, options, correctOption, category } = req.body;
 
     const updatedBank = await QuestionBank.findByIdAndUpdate(
       id,
-      { $push: { questions: { text, options, correctAnswer, category } } },
+      { $push: { questions: { text, options, correctOption, category } } },
       { new: true }
     );
 

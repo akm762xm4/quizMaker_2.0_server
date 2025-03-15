@@ -8,6 +8,7 @@ import {
   getAllQuizzesAdm,
   addQuestions,
   removeQuestions,
+  toggleQuiz,
 } from "../controllers/quizControllers";
 
 const router = express.Router();
@@ -25,6 +26,9 @@ router.post("/", createQuiz);
 
 // Update a quiz
 router.put("/:id", updateQuiz);
+
+//toggle quiz
+router.patch("/:id/toggle", toggleQuiz);
 
 // Delete a quiz
 router.delete("/:id", deleteQuiz);

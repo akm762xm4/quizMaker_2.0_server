@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import Quiz from "../models/Quiz";
 import createHttpError from "http-errors";
 import Question from "../models/Question";
+import mongoose from "mongoose";
 
 export const createQuiz = async (
   req: Request,
@@ -67,12 +68,16 @@ export const getQuizById = async (
 
   try {
     const quiz = await Quiz.findById(id)
-      .populate("createdBy", "username")
+      .populate("createdBy", "username") // Populate the createdBy field with the username
+      .populate("questions") // Populate the questions array with the actual question documents
       .exec();
+
     if (!quiz) {
       throw createHttpError(404, "Quiz not found");
     }
+
     res.status(200).json(quiz);
+    console.log(mongoose.models.Question);
   } catch (error) {
     next(error);
   }
@@ -92,6 +97,31 @@ export const updateQuiz = async (
       throw createHttpError(404, "Quiz not found");
     }
     res.status(200).json({ message: "Quiz updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleQuiz = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+
+  try {
+    const quiz = await Quiz.findById(id);
+    if (!quiz) {
+      throw createHttpError(404, "Quiz not found");
+    }
+
+    quiz.enabled = !quiz.enabled;
+    await quiz.save();
+
+    res.status(200).json({
+      message: `Quiz ${quiz.enabled ? "enabled" : "disabled"} successfully`,
+      quiz,
+    });
   } catch (error) {
     next(error);
   }
@@ -123,19 +153,19 @@ export const addQuestions = async (
 ) => {
   try {
     const { quizId } = req.params;
-    const { questionIds } = req.body; // Expecting an array of question IDs
+    const questionIds = req.body; // Expecting an array of question IDs
 
-    if (!questionIds || !Array.isArray(questionIds)) {
+    if (!questionIds) {
       throw createHttpError(400, "Invalid question IDs format");
     }
 
     // Verify that all question IDs exist
-    const existingQuestions = await Question.find({
-      _id: { $in: questionIds },
-    });
-    if (existingQuestions.length !== questionIds.length) {
-      throw createHttpError(404, "One or more questions not found");
-    }
+    // const existingQuestions = await Question.find({
+    //   _id: { $in: questionIds },
+    // });
+    // if (existingQuestions.length !== questionIds.length) {
+    //   throw createHttpError(404, "One or more questions not found");
+    // }
 
     // Update the quiz by adding questions (avoids duplicates)
     const updatedQuiz = await Quiz.findByIdAndUpdate(
@@ -147,6 +177,7 @@ export const addQuestions = async (
     if (!updatedQuiz) throw createHttpError(404, "Quiz not found!");
 
     res.json({ message: "Questions added to quiz!" });
+    // res.status(200).json(req.body);
   } catch (error) {
     next(error);
   }
@@ -160,22 +191,30 @@ export const removeQuestions = async (
 ) => {
   try {
     const { quizId } = req.params;
-    const { questionIds } = req.body; // Expecting an array of question IDs
+    const { questionIds } = req.body; // Array of question IDs to remove
 
-    if (!questionIds || !Array.isArray(questionIds)) {
-      throw createHttpError(400, "Invalid question IDs format");
+    if (!quizId) throw createHttpError(400, "Quiz ID is required");
+    if (
+      !questionIds ||
+      !Array.isArray(questionIds) ||
+      questionIds.length === 0
+    ) {
+      throw createHttpError(400, "Invalid or empty question IDs array");
     }
 
-    // Update the quiz by removing questions
+    // Update quiz by removing questions
     const updatedQuiz = await Quiz.findByIdAndUpdate(
       quizId,
-      { $pull: { questions: { $in: questionIds } } }, // Remove specified questions
+      { $pull: { questions: { $in: questionIds } } }, // Removes specified questions
       { new: true }
-    );
+    ).populate("questions");
 
     if (!updatedQuiz) throw createHttpError(404, "Quiz not found!");
 
-    res.json({ message: "Questions removed from quiz!" });
+    res.status(200).json({
+      message: "Questions removed successfully!",
+      updatedQuiz,
+    });
   } catch (error) {
     next(error);
   }

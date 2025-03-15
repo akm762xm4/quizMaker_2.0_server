@@ -8,6 +8,7 @@ import {
   getAllQuestionBanks,
   updateQuestion,
   getQuestions,
+  getQuestionBankById,
 } from "../controllers/questionBankControllers";
 
 const router = express.Router();
@@ -15,6 +16,8 @@ const router = express.Router();
 router.post("/", createQuestionBank);
 
 router.get("/", getAllQuestionBanks);
+
+router.get("/:id", getQuestionBankById);
 
 router.put("/:id", renameQuestionBank);
 
