@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
+import approveFacultyRoutes from "./routes/approvalRequestRoutes";
 import userRoutes from "./routes/userRoutes";
 import quizRoutes from "./routes/quizRoutes";
 import questionBankRoutes from "./routes/questionBankRoutes";
@@ -8,6 +9,7 @@ import { requiresAuth } from "./middlewares/requiresAuth";
 import morgan from "morgan";
 import cors from "cors";
 import createHttpError, { isHttpError } from "http-errors";
+import { isAdmin } from "./middlewares/isAdmin";
 
 const corsOptions = {
   origin: "*",
@@ -23,6 +25,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/approveFaculty", approveFacultyRoutes);
 app.use("/api/qbank", requiresAuth, questionBankRoutes);
 app.use("/api/quiz", requiresAuth, quizRoutes);
 app.use("/api/users", requiresAuth, userRoutes);

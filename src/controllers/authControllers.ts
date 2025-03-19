@@ -4,12 +4,13 @@ import { hashPassword } from "../utils/hashPassword";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import createHttpError from "http-errors";
+import ApprovalRequest from "../models/approvalRequest";
 
 export const registerUser = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<any> => {
   const { username, password, role } = req.body;
 
   if (!username || !password || !role) {
@@ -26,7 +27,23 @@ export const registerUser = async (
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
-    // Create the new user
+    // If the role is faculty, create an approval request instead of a user
+    if (role === "faculty") {
+      const approvalRequest = new ApprovalRequest({
+        username,
+        password: hashedPassword,
+        role,
+      });
+
+      await approvalRequest.save();
+
+      return res.status(201).json({
+        message: "Faculty registration request sent for admin approval",
+        approvalRequest,
+      });
+    }
+
+    // For other roles, create the user directly
     const user = new User({
       username,
       password: hashedPassword,
