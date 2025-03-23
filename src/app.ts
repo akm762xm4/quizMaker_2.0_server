@@ -9,7 +9,6 @@ import { requiresAuth } from "./middlewares/requiresAuth";
 import morgan from "morgan";
 import cors from "cors";
 import createHttpError, { isHttpError } from "http-errors";
-import { isAdmin } from "./middlewares/isAdmin";
 
 const corsOptions = {
   origin: "*",

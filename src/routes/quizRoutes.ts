@@ -10,33 +10,26 @@ import {
   removeQuestions,
   toggleQuiz,
 } from "../controllers/quizControllers";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = express.Router();
 
-router.get("/all", getAllQuizzesAdm);
+router.get("/all", isAdmin, getAllQuizzesAdm); //
 
-// Get all quizzes
-router.get("/", getAllQuizzes);
+router.get("/", getAllQuizzes); // Get all quizzes
 
-// Get a quiz by ID
-router.get("/:id", getQuizById);
+router.get("/:id", getQuizById); // Get a quiz by ID
 
-// Create a new quiz
-router.post("/", createQuiz);
+router.post("/", createQuiz); // Create a new quiz
 
-// Update a quiz
-router.put("/:id", updateQuiz);
+router.put("/:id", updateQuiz); // Update a quiz
 
-//toggle quiz
-router.patch("/:id/toggle", toggleQuiz);
+router.patch("/:id/toggle", toggleQuiz); //toggle quiz
 
-// Delete a quiz
-router.delete("/:id", deleteQuiz);
+router.delete("/:id", deleteQuiz); // Delete a quiz
 
-// Add Selected Questions to a Quiz
-router.post("/:quizId/addQuestions", addQuestions);
+router.patch("/:quizId/addQuestions", addQuestions); // Add Selected Questions to a Quiz
 
-// Remove Selected Questions from a Quiz
-router.delete("/:quizId/removeQuestions", removeQuestions);
+router.patch("/:quizId/removeQuestions", removeQuestions); // Remove Selected Questions from a Quiz
 
 export default router;

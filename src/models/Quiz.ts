@@ -11,7 +11,7 @@ interface IQuiz extends Document {
 const QuizSchema: Schema = new Schema(
   {
     title: { type: String, required: true },
-    questions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
+    questions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
     maxTime: { type: Number, required: true },
     enabled: { type: Boolean, default: false },
     createdBy: {

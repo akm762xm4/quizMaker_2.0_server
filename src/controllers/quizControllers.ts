@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import Quiz from "../models/Quiz";
 import createHttpError from "http-errors";
-import Question from "../models/Question";
-import mongoose from "mongoose";
 
 export const createQuiz = async (
   req: Request,
@@ -15,7 +13,6 @@ export const createQuiz = async (
     const quiz = new Quiz({
       title,
       maxTime,
-      enabled: false,
       createdBy: req.user?._id, // Assuming `req.user.id` stores faculty ID
     });
 
@@ -68,8 +65,8 @@ export const getQuizById = async (
 
   try {
     const quiz = await Quiz.findById(id)
-      .populate("createdBy", "username") // Populate the createdBy field with the username
-      .populate("questions") // Populate the questions array with the actual question documents
+      .populate("createdBy", "username") // Populate createdBy
+      .populate("questions") // Populate questions
       .exec();
 
     if (!quiz) {
@@ -77,7 +74,6 @@ export const getQuizById = async (
     }
 
     res.status(200).json(quiz);
-    console.log(mongoose.models.Question);
   } catch (error) {
     next(error);
   }
@@ -153,19 +149,11 @@ export const addQuestions = async (
 ) => {
   try {
     const { quizId } = req.params;
-    const questionIds = req.body; // Expecting an array of question IDs
+    const { questionIds } = req.body; // Expecting an array of question IDs
 
-    if (!questionIds) {
+    if (!questionIds || !Array.isArray(questionIds)) {
       throw createHttpError(400, "Invalid question IDs format");
     }
-
-    // Verify that all question IDs exist
-    // const existingQuestions = await Question.find({
-    //   _id: { $in: questionIds },
-    // });
-    // if (existingQuestions.length !== questionIds.length) {
-    //   throw createHttpError(404, "One or more questions not found");
-    // }
 
     // Update the quiz by adding questions (avoids duplicates)
     const updatedQuiz = await Quiz.findByIdAndUpdate(
@@ -176,14 +164,12 @@ export const addQuestions = async (
 
     if (!updatedQuiz) throw createHttpError(404, "Quiz not found!");
 
-    res.json({ message: "Questions added to quiz!" });
-    // res.status(200).json(req.body);
+    res.json({ message: "Questions added to quiz!", updatedQuiz });
   } catch (error) {
     next(error);
   }
 };
 
-// Remove Specific Questions from a Quiz
 export const removeQuestions = async (
   req: Request,
   res: Response,
@@ -202,12 +188,11 @@ export const removeQuestions = async (
       throw createHttpError(400, "Invalid or empty question IDs array");
     }
 
-    // Update quiz by removing questions
     const updatedQuiz = await Quiz.findByIdAndUpdate(
       quizId,
       { $pull: { questions: { $in: questionIds } } }, // Removes specified questions
       { new: true }
-    ).populate("questions");
+    );
 
     if (!updatedQuiz) throw createHttpError(404, "Quiz not found!");
 

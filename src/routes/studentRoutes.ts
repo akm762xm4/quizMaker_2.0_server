@@ -4,6 +4,7 @@ import {
   attemptQuiz,
   getResults,
   getAllResults,
+  getQuizQuestions,
 } from "../controllers/studentControllers";
 
 const router = express.Router();
@@ -14,9 +15,11 @@ router.get("/resultAdm", getAllResults);
 router.get("/quizzes", getAvailableQuizzes);
 
 // Attempt a quiz
-router.post("/quizzes/:id/attempt", attemptQuiz);
+router.post("/quizzes/attempt", attemptQuiz);
 
 // Get all attempted quiz results for the student
 router.get("/result", getResults);
+
+router.get("/:quizId/questions", getQuizQuestions);
 
 export default router;

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import QuestionBank from "../models/QuestionBank";
+import Question from "../models/Question";
 
 // Create a new Question Bank
 export const createQuestionBank = async (
@@ -15,7 +16,6 @@ export const createQuestionBank = async (
     const newQuestionBank = new QuestionBank({
       title,
       createdBy,
-      questions: [],
     });
     await newQuestionBank.save();
 
@@ -38,6 +38,7 @@ export const getAllQuestionBanks = async (
     }
     const questionBanks = await QuestionBank.find()
       .populate("createdBy", "username") // Fetch only the username of the creator
+      .populate("questions")
       .exec(); // Fetch all question banks
     res.status(200).json(questionBanks);
   } catch (error) {
@@ -58,6 +59,7 @@ export const getQuestionBankById = async (
     }
     const questionBank = await QuestionBank.findById(id)
       .populate("createdBy", "username") // Fetch only the username of the creator
+      .populate("questions")
       .exec(); // Fetch all question banks
     res.status(200).json(questionBank);
   } catch (error) {
@@ -147,15 +149,27 @@ export const addQuestion = async (
     const { id } = req.params;
     const { text, options, correctOption, category } = req.body;
 
+    // Create a new question using the Question model
+    const newQuestion = new Question({
+      text,
+      options,
+      correctOption,
+      category,
+    });
+
+    // Save the question to the database
+    await newQuestion.save();
+
+    // Add the question's ID to the QuestionBank's questions array
     const updatedBank = await QuestionBank.findByIdAndUpdate(
       id,
-      { $push: { questions: { text, options, correctOption, category } } },
+      { $push: { questions: newQuestion._id } }, // Store the reference
       { new: true }
     );
 
     if (!updatedBank) throw createHttpError(404, "Question Bank not found!");
 
-    res.json({ message: "Question Added!" });
+    res.json({ message: "Question Added!", question: newQuestion });
   } catch (error) {
     next(error);
   }
@@ -170,16 +184,21 @@ export const removeQuestion = async (
   try {
     const { id, questionId } = req.params;
 
+    // Remove the question reference from the QuestionBank
     const updatedBank = await QuestionBank.findByIdAndUpdate(
       id,
-      { $pull: { questions: { _id: questionId } } },
+      { $pull: { questions: questionId } }, // Remove the question reference
       { new: true }
     );
 
-    if (!updatedBank)
-      throw createHttpError(404, "Question Bank or Question not found!");
+    if (!updatedBank) {
+      throw createHttpError(404, "Question Bank not found!");
+    }
 
-    res.json({ message: "Question Removed!" });
+    // Optionally, delete the question from the Question collection
+    await Question.findByIdAndDelete(questionId);
+
+    res.json({ message: "Question Removed!", updatedBank });
   } catch (error) {
     next(error);
   }
@@ -191,19 +210,21 @@ export const updateQuestion = async (
   next: NextFunction
 ) => {
   try {
-    const { id, questionId } = req.params;
+    const { questionId } = req.params;
     const updates = req.body; // Updated data
 
-    const updatedBank = await QuestionBank.findOneAndUpdate(
-      { _id: id, "questions._id": questionId },
-      { $set: { "questions.$": { _id: questionId, ...updates } } }, // Update only that question
+    // Update the question in the Question collection
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      questionId,
+      updates,
       { new: true }
     );
 
-    if (!updatedBank)
-      throw createHttpError(404, "Question or Question Bank not found!");
+    if (!updatedQuestion) {
+      throw createHttpError(404, "Question not found!");
+    }
 
-    res.json({ message: "Question Updated!" });
+    res.json({ message: "Question Updated!", updatedQuestion });
   } catch (error) {
     next(error);
   }

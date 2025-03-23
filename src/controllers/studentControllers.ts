@@ -43,7 +43,7 @@ export const attemptQuiz = async (
   try {
     // Fetch the quiz
     const quiz = await Quiz.findById(quizId)
-      .populate("createdBy", "username")
+      .populate("questions") // Populate the questions
       .exec();
 
     if (!quiz) {
@@ -56,7 +56,7 @@ export const attemptQuiz = async (
 
     // Calculate the score
     let score = 0;
-    quiz.questions.forEach((question: any, index) => {
+    quiz.questions.forEach((question: any, index: number) => {
       if (question.correctOption === answers[index]) {
         score++;
       }
@@ -64,15 +64,17 @@ export const attemptQuiz = async (
 
     // Save the result
     const result = new Result({
-      studentId: req.user?.id,
+      studentId: req.user?.id, // Assuming the user ID is available in req.user
       quizId,
       score,
-      totalQuestions: quiz.questions.length,
+      totalMarks: quiz.questions.length, // Total marks is the total number of questions
+      attemptedOn: new Date(),
     });
 
     await result.save();
 
-    res.status(201).json({ message: "Quiz attempted successfully" });
+    res.status(201).json({ message: "Quiz attempted successfully", score });
+    res.status(200).json(quiz);
   } catch (error) {
     next(error);
   }
@@ -89,6 +91,32 @@ export const getResults = async (
       .populate("studentId", "username");
 
     res.status(200).json(results);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getQuizQuestions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { quizId } = req.params;
+
+  try {
+    const quiz = await Quiz.findById(quizId)
+      .populate("questions") // Populate the questions
+      .exec();
+
+    if (!quiz) {
+      throw createHttpError(404, "Quiz not found");
+    }
+
+    if (!quiz.enabled) {
+      throw createHttpError(400, "Quiz is not enabled");
+    }
+
+    res.status(200).json(quiz.questions);
   } catch (error) {
     next(error);
   }
