@@ -5,6 +5,7 @@ import {
   getResults,
   getAllResults,
   getQuizQuestions,
+  deleteResult,
 } from "../controllers/studentControllers";
 
 const router = express.Router();
@@ -21,5 +22,7 @@ router.post("/quizzes/attempt", attemptQuiz);
 router.get("/result", getResults);
 
 router.get("/:quizId/questions", getQuizQuestions);
+
+router.delete("/result/:resultId", deleteResult);
 
 export default router;

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import Quiz from "../models/Quiz";
 import Result from "../models/Result";
 import createHttpError from "http-errors";
+import { isValidObjectId } from "mongoose";
 
 export const getAllResults = async (
   req: Request,
@@ -117,6 +118,30 @@ export const getQuizQuestions = async (
     }
 
     res.status(200).json(quiz.questions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteResult = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { resultId } = req.params;
+
+  if (!isValidObjectId(resultId)) {
+    throw createHttpError(400, "Invalid result ID");
+  }
+
+  try {
+    const result = await Result.findByIdAndDelete(resultId);
+
+    if (!result) {
+      throw createHttpError(404, "Result not found");
+    }
+
+    res.status(200).json({ message: "Result deleted successfully" });
   } catch (error) {
     next(error);
   }
