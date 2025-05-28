@@ -70,7 +70,7 @@ npm run build
 npm run dev
 
 # Or using tsx directly
-tsx src/server.ts
+tsx src/index.ts
 ```
 
 ### Production Mode
