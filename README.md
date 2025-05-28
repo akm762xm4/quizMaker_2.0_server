@@ -45,14 +45,19 @@ cd quizmaker_2.0_server
 npm install
 ```
 
-3. Create a `.env` file in the root directory and add the following variables:
+3. Install tsx globally (for development):
+```bash
+npm install -g tsx
+```
+
+4. Create a `.env` file in the root directory and add the following variables:
 ```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 ```
 
-4. Build the TypeScript code:
+5. Build the TypeScript code:
 ```bash
 npm run build
 ```
@@ -61,11 +66,19 @@ npm run build
 
 ### Development Mode
 ```bash
+# Using the npm script (recommended)
 npm run dev
+
+# Or using tsx directly
+tsx src/server.ts
 ```
 
 ### Production Mode
 ```bash
+# First build the project
+npm run build
+
+# Then start the server
 npm start
 ```
 
