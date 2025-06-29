@@ -1,11 +1,12 @@
 import express from "express";
 import {
   approveFacultyRequest,
+  getAllFacultyRequests,
   getPendingFacultyRequests,
   checkExistingFacultyRequest,
-  getAllFacultyRequests,
   deleteRejectedRequest,
-} from "../controllers/approvalRequestControllers";
+} from "../controllers/approveRequestControllers";
+
 const router = express.Router();
 
 router.patch("", approveFacultyRequest);

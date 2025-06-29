@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import authRoutes from "./routes/authRoutes";
-import approveFacultyRoutes from "./routes/approvalRequestRoutes";
+import approveFacultyRoutes from "./routes/approveRequestRoutes";
 import userRoutes from "./routes/userRoutes";
 import quizRoutes from "./routes/quizRoutes";
 import questionBankRoutes from "./routes/questionBankRoutes";
