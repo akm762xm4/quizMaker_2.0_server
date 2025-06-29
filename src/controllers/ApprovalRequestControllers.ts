@@ -88,14 +88,14 @@ export const checkExistingFacultyRequest = async (
         const existingUser = await User.findOne({ username, role: "faculty" });
         if (!existingUser) {
           // User was deleted, allow new registration
-          return res.status(200).json({
+          res.status(200).json({
             hasRequest: false,
             message: "No existing faculty request found",
           });
         }
       }
 
-      return res.status(200).json({
+      res.status(200).json({
         hasRequest: true,
         status: existingRequest.status,
         message: `You have already sent a faculty registration request. Status: ${existingRequest.status}`,
