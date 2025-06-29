@@ -1,63 +1,85 @@
 # QuizMaker 2.0 Backend
 
-A robust backend server for the QuizMaker 2.0 application, built with Node.js, Express, TypeScript, and MongoDB.
+A robust backend server for the QuizMaker 2.0 application, built with Node.js, Express, TypeScript, and MongoDB. This application provides a comprehensive quiz management system with user authentication, faculty approval workflows, question bank management, and student quiz taking capabilities.
 
 ## 🚀 Features
 
-- User authentication and authorization
-- Quiz management system
-- RESTful API architecture
-- Secure password hashing
-- JWT-based authentication
-- MongoDB database integration
-- TypeScript for type safety
-- CORS enabled
-- Request logging with Morgan
+- **User Authentication & Authorization**
+  - JWT-based authentication
+  - Role-based access control (Admin, Faculty, Student)
+  - Secure password hashing with bcrypt
+  - User activation/deactivation system
+
+- **Faculty Management**
+  - Faculty approval request system
+  - Admin approval workflow
+  - Faculty account management
+
+- **Question Bank Management**
+  - Create and manage question banks
+  - Add, update, and remove questions
+  - Organize questions by categories
+
+- **Quiz Management**
+  - Create, update, and delete quizzes
+  - Add/remove questions from quizzes
+  - Quiz activation/deactivation
+  - Quiz availability management
+
+- **Student Features**
+  - View available quizzes for their class
+  - Take quizzes and submit answers
+  - View quiz results and performance
+  - Access quiz questions
+
+- **Administrative Features**
+  - User management
+  - Quiz oversight
+  - Result monitoring
+  - Faculty approval management
 
 ## 🛠️ Tech Stack
 
-- Node.js
-- Express.js
-- TypeScript
-- MongoDB with Mongoose
-- JWT for authentication
-- bcrypt for password hashing
-- dotenv for environment variables
-- cors for cross-origin resource sharing
-- morgan for HTTP request logging
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (jsonwebtoken)
+- **Password Hashing**: bcrypt
+- **Environment Management**: dotenv + envalid
+- **CORS**: Cross-origin resource sharing
+- **Logging**: Morgan HTTP request logger
+- **Error Handling**: http-errors
+- **Development**: nodemon, tsx
 
 ## 📋 Prerequisites
 
 - Node.js (v14 or higher)
-- MongoDB
-- npm or yarn
+- MongoDB database
+- npm or yarn package manager
 
 ## 🔧 Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/yourusername/quizmaker_2.0_server.git
 cd quizmaker_2.0_server
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Install tsx globally (for development):
-```bash
-npm install -g tsx
-```
-
-4. Create a `.env` file in the root directory and add the following variables:
+3. **Create environment file:**
+Create a `.env` file in the root directory with the following variables:
 ```env
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
 ```
 
-5. Build the TypeScript code:
+4. **Build the project:**
 ```bash
 npm run build
 ```
@@ -66,47 +88,112 @@ npm run build
 
 ### Development Mode
 ```bash
-# Using the npm script (recommended)
 npm run dev
-
-# Or using tsx directly
-tsx src/index.ts
 ```
 
 ### Production Mode
 ```bash
-# First build the project
+# Build the project first
 npm run build
 
-# Then start the server
+# Start the production server
 npm start
+```
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user and get JWT token
+
+### Faculty Approval System
+- `GET /api/approveFaculty` - Get all faculty requests
+- `GET /api/approveFaculty/pending` - Get pending faculty requests
+- `GET /api/approveFaculty/check/:username` - Check existing faculty request
+- `PATCH /api/approveFaculty` - Approve faculty request
+- `DELETE /api/approveFaculty/:requestId` - Delete rejected request
+
+### Question Bank Management
+- `GET /api/qbank` - Get all question banks
+- `GET /api/qbank/:id` - Get specific question bank
+- `POST /api/qbank` - Create new question bank
+- `PUT /api/qbank/:id` - Rename question bank
+- `DELETE /api/qbank/:id` - Delete question bank
+- `POST /api/qbank/addQuestion/:id` - Add question to bank
+- `DELETE /api/qbank/removeQuestion/:id/:questionId` - Remove question from bank
+- `PUT /api/qbank/updateQuestion/:questionId` - Update question
+
+### Quiz Management
+- `GET /api/quiz` - Get all quizzes
+- `GET /api/quiz/all` - Get all quizzes (admin only)
+- `GET /api/quiz/:id` - Get specific quiz
+- `POST /api/quiz` - Create new quiz
+- `PUT /api/quiz/:id` - Update quiz
+- `PATCH /api/quiz/:id/toggle` - Toggle quiz activation
+- `DELETE /api/quiz/:id` - Delete quiz
+- `PATCH /api/quiz/:quizId/addQuestions` - Add questions to quiz
+- `PATCH /api/quiz/:quizId/removeQuestions` - Remove questions from quiz
+
+### User Management
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get specific user
+- `POST /api/users` - Create new user
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+- `PATCH /api/users/:id/toggle` - Toggle user activation
+
+### Student Features
+- `GET /api/student/quizzes` - Get available quizzes for student
+- `POST /api/student/quizzes/attempt` - Attempt a quiz
+- `GET /api/student/result` - Get student's quiz results
+- `GET /api/student/resultAdm` - Get all results (admin)
+- `GET /api/student/:quizId/questions` - Get quiz questions
+- `DELETE /api/student/result/:resultId` - Delete result
+
+## 🔐 Authentication
+
+Most endpoints require authentication. Include the JWT token in the Authorization header:
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── controllers/          # Route controllers
+├── middlewares/          # Custom middleware
+├── models/              # MongoDB models
+├── routes/              # API routes
+├── types/               # TypeScript type definitions
+├── utils/               # Utility functions
+├── app.ts              # Express app configuration
+└── index.ts            # Server entry point
 ```
 
 ## 🔑 Testing Credentials
 
 For testing the deployed version, you can use the following credentials:
 
-- Username: `admin`
-- Password: `123`
+- **Username**: `admin`
+- **Password**: `123`
 
-## 📚 API Documentation
+## 🚀 Deployment
 
-The API endpoints are documented in the following structure:
+The project includes Vercel configuration for easy deployment:
 
-### Authentication
-- POST `/api/auth/register` - Register a new user
-- POST `/api/auth/login` - Login user
-
-### Quizzes
-- GET `/api/quizzes` - Get all quizzes
-- POST `/api/quizzes` - Create a new quiz
-- GET `/api/quizzes/:id` - Get a specific quiz
-- PUT `/api/quizzes/:id` - Update a quiz
-- DELETE `/api/quizzes/:id` - Delete a quiz
+```bash
+# Deploy to Vercel
+vercel --prod
+```
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/quizmaker_2.0_server/issues).
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📝 License
 

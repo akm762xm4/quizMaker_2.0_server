@@ -68,3 +68,97 @@ export const getPendingFacultyRequests = async (
     next(error);
   }
 };
+
+export const checkExistingFacultyRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { username } = req.params;
+
+  try {
+    const existingRequest = await ApprovalRequest.findOne({
+      username,
+      role: "faculty",
+    });
+
+    if (existingRequest) {
+      // If request is approved, check if the user still exists
+      if (existingRequest.status === "approved") {
+        const existingUser = await User.findOne({ username, role: "faculty" });
+        if (!existingUser) {
+          // User was deleted, allow new registration
+          return res.status(200).json({
+            hasRequest: false,
+            message: "No existing faculty request found",
+          });
+        }
+      }
+
+      return res.status(200).json({
+        hasRequest: true,
+        status: existingRequest.status,
+        message: `You have already sent a faculty registration request. Status: ${existingRequest.status}`,
+      });
+    }
+
+    res.status(200).json({
+      hasRequest: false,
+      message: "No existing faculty request found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllFacultyRequests = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { status } = req.query;
+
+  try {
+    let query: any = { role: "faculty" };
+
+    if (status && status !== "all") {
+      query = { ...query, status: status as string };
+    }
+
+    const requests = await ApprovalRequest.find(query).sort({ createdAt: -1 });
+    res.status(200).json(requests);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRejectedRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { requestId } = req.params;
+
+  try {
+    const request = await ApprovalRequest.findById(requestId);
+
+    if (!request) {
+      throw createHttpError(404, "Request not found");
+    }
+
+    if (request.status !== "rejected" && request.status !== "approved") {
+      throw createHttpError(
+        400,
+        "Only rejected or approved requests can be deleted"
+      );
+    }
+
+    await ApprovalRequest.findByIdAndDelete(requestId);
+
+    res.status(200).json({
+      message: `${request.status} request deleted successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

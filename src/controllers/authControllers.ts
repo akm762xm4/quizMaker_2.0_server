@@ -29,6 +29,29 @@ export const registerUser = async (
 
     // If the role is faculty, create an approval request instead of a user
     if (role === "faculty") {
+      const existingApprovalRequest = await ApprovalRequest.findOne({
+        $and: [{ username }, { role: "faculty" }],
+      });
+
+      if (existingApprovalRequest) {
+        if (existingApprovalRequest.status === "pending") {
+          throw createHttpError(
+            409,
+            "You have already requested for faculty registration and your request is still pending admin approval"
+          );
+        } else if (existingApprovalRequest.status === "approved") {
+          throw createHttpError(
+            409,
+            "Your faculty registration request has already been approved. Please contact admin if you need assistance"
+          );
+        } else if (existingApprovalRequest.status === "rejected") {
+          throw createHttpError(
+            409,
+            "Your faculty registration request was rejected. Please contact admin for more information"
+          );
+        }
+      }
+
       const approvalRequest = new ApprovalRequest({
         username,
         password: hashedPassword,
