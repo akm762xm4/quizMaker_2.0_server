@@ -75,7 +75,7 @@ export const attemptQuiz = async (
     await result.save();
 
     res.status(201).json({ message: "Quiz attempted successfully", score });
-    res.status(200).json(quiz);
+    // res.status(200).json(quiz);
   } catch (error) {
     next(error);
   }

@@ -7,7 +7,7 @@ import {
   removeQuestion,
   getAllQuestionBanks,
   updateQuestion,
-  getQuestions,
+  // getQuestions,
   getQuestionBankById,
 } from "../controllers/questionBankControllers";
 
