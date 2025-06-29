@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 // Get all users
-// router.get("/", getAllUsers);
+router.get("/", getAllUsers);
 
 // Get a user by ID
 router.get("/:id", getUserById);
