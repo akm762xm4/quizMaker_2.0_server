@@ -17,6 +17,12 @@ export const registerUser = async (
     throw createHttpError(400, "Please fill all fields!");
   }
 
+  // Public registration must never be able to mint an administrator account.
+  // Administrators create managed users through the protected users endpoint.
+  if (role !== "student" && role !== "faculty") {
+    throw createHttpError(400, "Please choose a valid registration role.");
+  }
+
   try {
     // Check if the username already exists
     const existingUser = await User.findOne({ username });

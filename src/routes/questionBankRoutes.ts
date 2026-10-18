@@ -10,8 +10,11 @@ import {
   // getQuestions,
   getQuestionBankById,
 } from "../controllers/questionBankControllers";
+import { requireRole } from "../middlewares/requireRole";
 
 const router = express.Router();
+
+router.use(requireRole("admin", "faculty"));
 
 router.post("/", createQuestionBank);
 

@@ -7,8 +7,11 @@ import {
   deleteUser,
   toggleUserActivation,
 } from "../controllers/userControllers";
+import { requireRole } from "../middlewares/requireRole";
 
 const router = express.Router();
+
+router.use(requireRole("admin"));
 
 // Get all users
 router.get("/", getAllUsers);

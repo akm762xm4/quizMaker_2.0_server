@@ -11,25 +11,26 @@ import {
   toggleQuiz,
 } from "../controllers/quizControllers";
 import { isAdmin } from "../middlewares/isAdmin";
+import { requireRole } from "../middlewares/requireRole";
 
 const router = express.Router();
 
-router.get("/all", isAdmin, getAllQuizzesAdm); //
+router.get("/all", isAdmin, getAllQuizzesAdm);
 
-router.get("/", getAllQuizzes); // Get all quizzes
+router.get("/", requireRole("faculty"), getAllQuizzes);
 
-router.get("/:id", getQuizById); // Get a quiz by ID
+router.get("/:id", requireRole("faculty"), getQuizById);
 
-router.post("/", createQuiz); // Create a new quiz
+router.post("/", requireRole("faculty"), createQuiz);
 
-router.put("/:id", updateQuiz); // Update a quiz
+router.put("/:id", requireRole("faculty"), updateQuiz);
 
-router.patch("/:id/toggle", toggleQuiz); //toggle quiz
+router.patch("/:id/toggle", requireRole("faculty"), toggleQuiz);
 
-router.delete("/:id", deleteQuiz); // Delete a quiz
+router.delete("/:id", requireRole("faculty"), deleteQuiz);
 
-router.patch("/:quizId/addQuestions", addQuestions); // Add Selected Questions to a Quiz
+router.patch("/:quizId/addQuestions", requireRole("faculty"), addQuestions);
 
-router.patch("/:quizId/removeQuestions", removeQuestions); // Remove Selected Questions from a Quiz
+router.patch("/:quizId/removeQuestions", requireRole("faculty"), removeQuestions);
 
 export default router;

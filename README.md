@@ -157,6 +157,18 @@ Most endpoints require authentication. Include the JWT token in the Authorizatio
 Authorization: Bearer <your_jwt_token>
 ```
 
+## 🎬 Portfolio demo workspace
+
+The client home screen includes one-click, public demo accounts for each role. They are deliberately separate from real users and can be reset after a recruiter explores the product.
+
+1. Set `MONGO_URI`, `JWT_SECRET`, and (optionally) `DEMO_PASSWORD` in the deployed server environment. Use a non-default `DEMO_PASSWORD` for a public deployment. `DEMO_PASS` is also supported as a compatibility alias.
+2. Run `npm run demo:seed` from this server directory once after deployment, and any time you want to restore the sample workspace.
+3. Configure the client’s `VITE_DEMO_*` values to match the password and usernames. The default usernames are `demo-admin`, `demo-faculty`, and `demo-student`.
+
+The seed creates a faculty-owned question bank, an active quiz, and a sample student result. It deletes and recreates **only** data owned by the demo faculty/student, so it does not reset normal application users.
+
+Role permissions are enforced by the API as well as the client routes: admins manage users and faculty approvals, faculty manage question banks and quizzes, and students can take quizzes and view their own results.
+
 ## 🏗️ Project Structure
 
 ```

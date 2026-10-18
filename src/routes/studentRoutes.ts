@@ -7,22 +7,23 @@ import {
   getQuizQuestions,
   deleteResult,
 } from "../controllers/studentControllers";
+import { requireRole } from "../middlewares/requireRole";
 
 const router = express.Router();
 
-router.get("/resultAdm", getAllResults);
+router.get("/resultAdm", requireRole("admin", "faculty"), getAllResults);
 
 // Get quizzes available for the student's class
-router.get("/quizzes", getAvailableQuizzes);
+router.get("/quizzes", requireRole("student"), getAvailableQuizzes);
 
 // Attempt a quiz
-router.post("/quizzes/attempt", attemptQuiz);
+router.post("/quizzes/attempt", requireRole("student"), attemptQuiz);
 
 // Get all attempted quiz results for the student
-router.get("/result", getResults);
+router.get("/result", requireRole("student"), getResults);
 
-router.get("/:quizId/questions", getQuizQuestions);
+router.get("/:quizId/questions", requireRole("student"), getQuizQuestions);
 
-router.delete("/result/:resultId", deleteResult);
+router.delete("/result/:resultId", requireRole("admin"), deleteResult);
 
 export default router;
