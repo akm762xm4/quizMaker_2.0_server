@@ -19,7 +19,7 @@ router.get("/all", isAdmin, getAllQuizzesAdm);
 
 router.get("/", requireRole("faculty"), getAllQuizzes);
 
-router.get("/:id", requireRole("faculty"), getQuizById);
+router.get("/:id", requireRole("faculty", "student"), getQuizById);
 
 router.post("/", requireRole("faculty"), createQuiz);
 

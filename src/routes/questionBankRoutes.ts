@@ -11,12 +11,20 @@ import {
   getQuestionBankById,
 } from "../controllers/questionBankControllers";
 import { requireRole } from "../middlewares/requireRole";
+import multer from "multer";
+import { importQuestionBankFromDocument } from "../controllers/documentImportControllers";
 
 const router = express.Router();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 router.use(requireRole("admin", "faculty"));
 
 router.post("/", createQuestionBank);
+
+router.post("/import-document", upload.single("file"), importQuestionBankFromDocument);
 
 router.get("/", getAllQuestionBanks);
 

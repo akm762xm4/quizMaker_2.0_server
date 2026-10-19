@@ -24,7 +24,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/approveFaculty", approveFacultyRoutes);
+app.use("/api/approveFaculty", requiresAuth, approveFacultyRoutes);
 app.use("/api/qbank", requiresAuth, questionBankRoutes);
 app.use("/api/quiz", requiresAuth, quizRoutes);
 app.use("/api/users", requiresAuth, userRoutes);
@@ -42,6 +42,10 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (isHttpError(error)) {
     statusCode = error.status;
     errorMessage = error.message;
+  } else if (error instanceof Error) {
+    // Keep unexpected failures diagnosable during local development instead
+    // of hiding every document-import problem behind the same generic text.
+    errorMessage = error.message || errorMessage;
   }
   res.status(statusCode).json({ error: errorMessage });
 });
