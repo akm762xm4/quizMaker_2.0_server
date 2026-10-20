@@ -14,20 +14,25 @@ export type ExtractedQuestion = {
 export async function extractDocumentText(
   buffer: Buffer,
   mimeType: string,
-  filename: string
+  filename: string,
 ) {
   const extension = filename.toLowerCase().split(".").pop();
   let text = "";
 
   if (mimeType === "application/pdf" || extension === "pdf") {
     try {
-      const { PDFParse } = await import("pdf-parse/node");
+      const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: buffer });
       const result = await parser.getText();
       text = result.text;
       await parser.destroy();
     } catch (error) {
-      throw createHttpError(422, "This PDF could not be read. It may be scanned, encrypted, or malformed.", { cause: error });
+      console.error("PDF parse failed:", error);
+      throw createHttpError(
+        422,
+        "This PDF could not be read. It may be scanned, encrypted, or malformed.",
+        { cause: error },
+      );
     }
   } else if (
     mimeType ===
@@ -38,7 +43,9 @@ export async function extractDocumentText(
       const result = await mammoth.extractRawText({ buffer });
       text = result.value;
     } catch (error) {
-      throw createHttpError(422, "This Word document could not be read.", { cause: error });
+      throw createHttpError(422, "This Word document could not be read.", {
+        cause: error,
+      });
     }
   } else if (mimeType === "text/plain" || extension === "txt") {
     text = buffer.toString("utf8");
@@ -46,17 +53,25 @@ export async function extractDocumentText(
     throw createHttpError(400, "Only PDF, DOCX, and TXT files are supported.");
   }
 
-  const normalized = text.replace(/\u0000/g, "").replace(/[ \t]+\n/g, "\n").trim();
+  const normalized = text
+    .replace(/\u0000/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
   if (!normalized) {
     throw createHttpError(422, "No readable text was found in this document.");
   }
   return normalized.slice(0, MAX_TEXT_LENGTH);
 }
 
-export async function extractMcqsFromText(text: string): Promise<ExtractedQuestion[]> {
+export async function extractMcqsFromText(
+  text: string,
+): Promise<ExtractedQuestion[]> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw createHttpError(503, "Document extraction is not configured yet. Add GEMINI_API_KEY to the server environment.");
+    throw createHttpError(
+      503,
+      "Document extraction is not configured yet. Add GEMINI_API_KEY to the server environment.",
+    );
   }
 
   const client = new GoogleGenerativeAI(apiKey);
@@ -73,7 +88,10 @@ export async function extractMcqsFromText(text: string): Promise<ExtractedQuesti
               type: SchemaType.OBJECT,
               properties: {
                 text: { type: SchemaType.STRING },
-                options: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+                options: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING },
+                },
                 correctOption: { type: SchemaType.INTEGER },
                 category: { type: SchemaType.STRING },
               },
@@ -97,7 +115,10 @@ export async function extractMcqsFromText(text: string): Promise<ExtractedQuesti
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw createHttpError(502, "The AI returned an invalid question format. Please try the document again.");
+    throw createHttpError(
+      502,
+      "The AI returned an invalid question format. Please try the document again.",
+    );
   }
 
   const questions = (parsed as { questions?: unknown })?.questions;
@@ -111,7 +132,9 @@ export async function extractMcqsFromText(text: string): Promise<ExtractedQuesti
       candidate.text.trim().length > 0 &&
       Array.isArray(candidate.options) &&
       candidate.options.length >= 2 &&
-      candidate.options.every((option) => typeof option === "string" && option.trim()) &&
+      candidate.options.every(
+        (option) => typeof option === "string" && option.trim(),
+      ) &&
       Number.isInteger(candidate.correctOption) &&
       typeof candidate.correctOption === "number" &&
       candidate.correctOption >= 0 &&
