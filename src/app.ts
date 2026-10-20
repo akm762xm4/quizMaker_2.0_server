@@ -10,8 +10,26 @@ import morgan from "morgan";
 import cors from "cors";
 import createHttpError, { isHttpError } from "http-errors";
 
+const allowedOrigins = new Set(
+  (process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
 const corsOptions = {
-  origin: "*",
+  origin: (origin: string | undefined, callback: (error: Error | null, origin?: boolean) => void) => {
+    if (
+      !origin ||
+      allowedOrigins.has(origin) ||
+      /^https:\/\/quiz-maker-2-0-client-[a-z0-9-]+\.vercel\.app$/.test(origin)
+    ) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Origin is not allowed by CORS"));
+  },
   credentials: true,
 };
 

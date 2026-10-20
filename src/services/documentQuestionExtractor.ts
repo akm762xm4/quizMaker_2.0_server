@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import createHttpError from "http-errors";
 
@@ -22,6 +21,7 @@ export async function extractDocumentText(
 
   if (mimeType === "application/pdf" || extension === "pdf") {
     try {
+      const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: buffer });
       const result = await parser.getText();
       text = result.text;
