@@ -21,11 +21,9 @@ export async function extractDocumentText(
 
   if (mimeType === "application/pdf" || extension === "pdf") {
     try {
-      const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
+      const pdfParse = (await import("pdf-parse")).default;
+      const result = await pdfParse(buffer);
       text = result.text;
-      await parser.destroy();
     } catch (error) {
       console.error("PDF parse failed:", error);
       throw createHttpError(
